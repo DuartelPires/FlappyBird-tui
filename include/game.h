@@ -5,5 +5,6 @@
 
 void* game_loop(void* arg);
 void gravity(session *currentSession);
+void waitTime(int milliseconds);
 
 #endif

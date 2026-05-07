@@ -9,13 +9,15 @@
 extern pthread_mutex_t gameSessionLock;
 
 int checkGroundCollision(session *currentSession) {
-  if (currentSession->gameBird.y + currentSession->gameBird.height >= BOARD_HEIGHT)
+  if (currentSession->gameBird.y + currentSession->gameBird.height >=
+      BOARD_HEIGHT)
     return 1;
   return 0;
 }
 
 void waitTime(int milliseconds) { usleep(milliseconds * 1000); }
 
+// if you didnt hit the ground, you fall
 void gravity(session *currentSession) {
   if (checkGroundCollision(currentSession)) {
     currentSession->gameBird.alive = 0;
@@ -34,7 +36,7 @@ void *game_loop(void *arg) {
     gravity(currentSession);
     pthread_mutex_unlock(&gameSessionLock);
 
-    waitTime(250); 
+    waitTime(200);
   }
   return NULL;
 }

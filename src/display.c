@@ -78,18 +78,22 @@ void terminal_cleanup() {
   endwin();
 }
 void draw_board(session *s) {
-  // Clear the screen before drawing
-  clear();
+  // Erase the screen (more gentle than clear() to avoid flickering)
+  erase();
 
   // Draw board content
   for (int i = 0; i < BOARD_HEIGHT; i++) {
     for (int j = 0; j < BOARD_WIDTH; j++) {
       char c = s->gameBoard[i][j];
       if (c != ' ') {
-        if (c == s->gameBird.birdSymbol) {
+        if (c == s->gameBird.symbol) {
           attron(COLOR_PAIR(1));
           mvaddch(i + 1, j + 1, c);
           attroff(COLOR_PAIR(1));
+        } else if (c == s->pipes[0].symbol) {
+          attron(COLOR_PAIR(2));
+          mvaddch(i + 1, j + 1, c);
+          attroff(COLOR_PAIR(2));
         } else {
           mvaddch(i + 1, j + 1, c);
         }

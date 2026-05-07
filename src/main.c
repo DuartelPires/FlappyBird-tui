@@ -1,8 +1,10 @@
 #include "board.h"
 #include "display.h"
 #include "game.h"
+#include "pipe.h"
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 pthread_mutex_t gameSessionLock;
@@ -21,11 +23,28 @@ int main() {
   pthread_t gameThread;
   pthread_create(&gameThread, NULL, game_loop, (void *)&currentSession);
 
+  // initiate pipes
+  for (int i = 0; i < currentSession.pipeCount; i++) {
+    pipe_arg *arg = malloc(sizeof(pipe_arg));
+    arg->s = &currentSession;
+    arg->index = i;
+    pthread_create(&currentSession.pipes[i].pipeThread, NULL,
+                   individual_pipe_loop, arg);
+  }
+
   pthread_t drawThread;
   pthread_create(&drawThread, NULL, draw_loop, (void *)&currentSession);
 
+  // check user input
   char input;
-  while ((input = get_input()) != 'Q') {
+  while (1) {
+    pthread_mutex_lock(&gameSessionLock);
+    input = get_input();
+    pthread_mutex_unlock(&gameSessionLock);
+
+    if (input == 'Q')
+      break;
+
     if (input == ' ') {
       pthread_mutex_lock(&gameSessionLock);
       if (currentSession.gameBird.y > 0) {
@@ -37,7 +56,7 @@ int main() {
       pthread_mutex_unlock(&gameSessionLock);
     }
 
-    usleep(10000); // Small sleep to avoid hogging CPU
+    usleep(10000);
   }
 
   currentSession.gameBird.alive = 0;
