@@ -33,6 +33,7 @@ void initSession(session *s) {
   for (int i = 0; i < s->pipeCount; i++) {
     s->pipes[i].x = -1;
     s->pipes[i].y = -1;
+    s->pipes[i].topY = -1;
     s->pipes[i].width = 3;
     s->pipes[i].height = 100;
     s->pipes[i].isDown = 1;
@@ -40,7 +41,7 @@ void initSession(session *s) {
     s->pipes[i].symbol = '@';
     s->pipes[i].isVisible = 0;
     s->pipes[i].creationDelay = delay;
-    delay += 3000;
+    delay += 2666;
   }
 
   resetBoard(s->gameBoard);
@@ -55,6 +56,28 @@ void putOnBoard(session *currentSession, int x, int y, char c, int width,
       }
     }
   }
+}
+
+// ver se esta no x do pipe e se esta entre topY e y
+void checkForPoints(session *currentSession, int index) {
+  int birdY = currentSession->gameBird.y;
+  int birdX = currentSession->gameBird.x;
+
+  int x = currentSession->pipes[index].x;
+  int y = currentSession->pipes[index].y;
+  int topY = currentSession->pipes[index].topY;
+
+  if (x == birdX && (birdY > topY && birdY < y)) {
+    currentSession->score++;
+  }
+}
+
+void putPipesOnBoard(session *currentSession, pipeWall pipe) {
+  // top pipe
+  putOnBoard(currentSession, pipe.x, 0, pipe.symbol, pipe.width, pipe.topY);
+  // bottom pipe
+  putOnBoard(currentSession, pipe.x, pipe.y, pipe.symbol, pipe.width,
+             pipe.height);
 }
 
 void setBirdPosition(session *currentSession, int x, int y) {
@@ -73,10 +96,7 @@ void setStartingBoard(session *currentSession) {
   // Draw pipes
   for (int i = 0; i < currentSession->pipeCount; i++) {
     if (currentSession->pipes[i].isVisible) {
-      putOnBoard(currentSession, currentSession->pipes[i].x,
-                 currentSession->pipes[i].y, currentSession->pipes[i].symbol,
-                 currentSession->pipes[i].width,
-                 currentSession->pipes[i].height);
+      putPipesOnBoard(currentSession, currentSession->pipes[i]);
     }
   }
 }

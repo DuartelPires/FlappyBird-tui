@@ -19,6 +19,7 @@ typedef struct {
 typedef struct {
   int x;
   int y;
+  int topY;
   int width;
   int height;
   int isDown;
@@ -43,5 +44,7 @@ void putOnBoard(session *currentSession, int x, int y, char c, int width,
                 int height);
 void setBirdPosition(session *currentSession, int x, int y);
 void setStartingBoard(session *currentSession);
+void putPipesOnBoard(session *currentSession, pipeWall pipe);
+void checkForPoints(session *currentSession, int index);
 
 #endif

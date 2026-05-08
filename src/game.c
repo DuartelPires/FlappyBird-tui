@@ -36,7 +36,7 @@ void *game_loop(void *arg) {
     gravity(currentSession);
     pthread_mutex_unlock(&gameSessionLock);
 
-    waitTime(200);
+    waitTime(150);
   }
   return NULL;
 }

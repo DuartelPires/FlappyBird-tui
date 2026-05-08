@@ -10,15 +10,16 @@ extern pthread_mutex_t gameSessionLock;
 void placePipe(session *currentSession, int index) {
   currentSession->pipes[index].x = BOARD_WIDTH - 1;
   if (!currentSession->pipes[index].isVisible) {
-    currentSession->pipes[index].y = (rand() % (BOARD_HEIGHT - 10)) + 5;
+    currentSession->pipes[index].y = (rand() % (BOARD_HEIGHT - 10)) + 7;
+    currentSession->pipes[index].topY = currentSession->pipes[index].y - 6;
     currentSession->pipes[index].isVisible = 1;
   }
   setStartingBoard(currentSession);
 }
 
 int checkPipeReachedCorner(session *currentSession, int index) {
-  if (currentSession->pipes[index].x + currentSession->pipes[index].width <=
-      0) {
+  if (currentSession->pipes[index].x + currentSession->pipes[index].width 
+    <= 0) {
     return 1;
   }
   return 0;
@@ -50,6 +51,7 @@ void *individual_pipe_loop(void *arg) {
   while (currentSession->gameBird.alive) {
     pthread_mutex_lock(&gameSessionLock);
     movePipe(currentSession, index);
+    checkForPoints(currentSession, index);
     pthread_mutex_unlock(&gameSessionLock);
 
     waitTime(100);
