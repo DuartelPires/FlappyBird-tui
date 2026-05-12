@@ -9,6 +9,35 @@
 
 pthread_mutex_t gameSessionLock;
 
+int checkInput(session *currentSession) {
+  char input;
+  pthread_mutex_lock(&gameSessionLock);
+  input = get_input();
+  pthread_mutex_unlock(&gameSessionLock);
+
+  if (input == 'Q')
+    return 1;
+
+  if (input == ' ') {
+    pthread_mutex_lock(&gameSessionLock);
+    birdJump(currentSession);
+    pthread_mutex_unlock(&gameSessionLock);
+  }
+
+  usleep(10000);
+  return 0;
+}
+
+void initiatePipeThreads(session *currentSession) {
+  for (int i = 0; i < currentSession->pipeCount; i++) {
+    pipe_arg *arg = malloc(sizeof(pipe_arg));
+    arg->s = currentSession;
+    arg->index = i;
+    pthread_create(&currentSession->pipes[i].pipeThread, NULL,
+                   individualPipeLoop, arg);
+  }
+}
+
 int main() {
   session currentSession;
 
@@ -20,43 +49,21 @@ int main() {
   setStartingBoard(&currentSession);
   draw_board(&currentSession);
 
+  // initiate game thread
   pthread_t gameThread;
   pthread_create(&gameThread, NULL, game_loop, (void *)&currentSession);
 
-  // initiate pipes
-  for (int i = 0; i < currentSession.pipeCount; i++) {
-    pipe_arg *arg = malloc(sizeof(pipe_arg));
-    arg->s = &currentSession;
-    arg->index = i;
-    pthread_create(&currentSession.pipes[i].pipeThread, NULL,
-                   individual_pipe_loop, arg);
-  }
+  // initiate pipe thread
+  initiatePipeThreads(&currentSession);
 
+  // initiate draw thread
   pthread_t drawThread;
   pthread_create(&drawThread, NULL, draw_loop, (void *)&currentSession);
 
   // check user input
-  char input;
   while (1) {
-    pthread_mutex_lock(&gameSessionLock);
-    input = get_input();
-    pthread_mutex_unlock(&gameSessionLock);
-
-    if (input == 'Q')
+    if (checkInput(&currentSession))
       break;
-
-    if (input == ' ') {
-      pthread_mutex_lock(&gameSessionLock);
-      if (currentSession.gameBird.y > 0) {
-        currentSession.gameBird.y -= 3; // Jump!
-        if (currentSession.gameBird.y < 0)
-          currentSession.gameBird.y = 0;
-        setStartingBoard(&currentSession);
-      }
-      pthread_mutex_unlock(&gameSessionLock);
-    }
-
-    usleep(10000);
   }
 
   currentSession.gameBird.alive = 0;

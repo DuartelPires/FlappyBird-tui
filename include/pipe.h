@@ -8,7 +8,7 @@ typedef struct {
   int index;
 } pipe_arg;
 
-void *individual_pipe_loop(void *arg);
+void *individualPipeLoop(void *arg);
 void placePipeRight(session *currentSession, int index);
 
 #endif

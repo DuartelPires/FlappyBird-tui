@@ -86,17 +86,16 @@ void draw_board(session *s) {
     for (int j = 0; j < BOARD_WIDTH; j++) {
       char c = s->gameBoard[i][j];
       if (c != ' ') {
-        if (c == s->gameBird.symbol) {
+        if (c == s->pipes[0].symbol) {
+          attron(
+              A_REVERSE); // Inverte a cor (o fundo passa a ser a cor do texto)
+          mvaddch(i + 1, j + 1,
+                  ' '); // Desenha um espaço (que parecerá um bloco sólido)
+          attroff(A_REVERSE);
+        } else if (c == s->gameBird.symbol) {
           attron(COLOR_PAIR(1));
           mvaddch(i + 1, j + 1, c);
           attroff(COLOR_PAIR(1));
-        } else if (c == s->pipes[0].symbol) {
-          attron(A_REVERSE); // Inverte a cor (o fundo passa a ser a cor do texto)
-          mvaddch(i+1, j+1, ' '); // Desenha um espaço (que parecerá um bloco sólido)
-          attroff(A_REVERSE);
-          //attron(COLOR_PAIR(2));
-          //mvaddch(i + 1, j + 1, c);
-          //attroff(COLOR_PAIR(2));
         } else {
           mvaddch(i + 1, j + 1, c);
         }
